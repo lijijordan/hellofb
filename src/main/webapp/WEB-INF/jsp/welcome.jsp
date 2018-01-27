@@ -115,7 +115,8 @@ https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js--%>
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
-                
+                $('#foo').hide();
+                $('#submit').hide();
             },
             failure: function (errMsg) {
                 alert('save error!');
