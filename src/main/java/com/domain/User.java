@@ -15,6 +15,15 @@ public class User implements Serializable {
     private Date createTime;
     private String message;
     private String ip;
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     @Override
     public String toString() {

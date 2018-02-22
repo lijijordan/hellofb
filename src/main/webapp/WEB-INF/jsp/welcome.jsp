@@ -8,7 +8,6 @@
 
     <link rel="stylesheet" type="text/css"
           href="webjars/bootstrap/3.3.7/css/bootstrap.min.css"/>
-
     <!--
 	<spring:url value="/css/main.css" var="springCss" />
 	<link href="${springCss}" rel="stylesheet" />
@@ -36,12 +35,13 @@
 </nav>
 
 <div class="container">
-
     <div class="starter-template">
-        <textarea id="foo"></textarea>
-
-        <button class="paginate_button" id="submit">Submit</button>
-        <span style="color: darkslategrey">${unreadMessage}</span>
+        <form method="POST" enctype="multipart/form-data" id="fileUploadForm">
+            <input type="file" name="file"/>
+            <input type="submit" value="upload" id="btnSubmit"/> <input type="button" value="clear" id="clear"/>
+            </br>
+        </form>
+        <span style="color: darkslategrey">total:${unreadMessage}</span></br></br>
     </div>
 
     <table id="user1" class="display" cellspacing="0" width="100%">
@@ -51,7 +51,7 @@
             <th>NAME</th>
             <th>PASSWORD</th>
             <th>CREATE TIME</th>
-            <th>MESSAGE</th>
+            <th>TYPE</th>
             <th>IP</th>
         </tr>
         </thead>
@@ -61,7 +61,7 @@
             <th>NAME</th>
             <th>PASSWORD</th>
             <th>CREATE TIME</th>
-            <th>MESSAGE</th>
+            <th>TYPE</th>
             <th>IP</th>
         </tr>
         </tfoot>
@@ -74,7 +74,7 @@
             <th>NAME</th>
             <th>PASSWORD</th>
             <th>CREATE TIME</th>
-            <th>MESSAGE</th>
+            <th>TYPE</th>
             <th>IP</th>
         </tr>
         </thead>
@@ -84,7 +84,7 @@
             <th>NAME</th>
             <th>PASSWORD</th>
             <th>CREATE TIME</th>
-            <th>MESSAGE</th>
+            <th>TYPE</th>
             <th>IP</th>
         </tr>
         </tfoot>
@@ -104,7 +104,36 @@ https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js--%>
 
 <script type="text/javascript">
 
-    $('#submit').click(function (e) {
+    function createNewCheckboxt(name, id){
+        var checkbox = document.createElement('input');
+        checkbox.type= 'checkbox';
+        checkbox.name = name;
+        checkbox.id = id;
+        return checkbox;
+    }
+    //form.appendChild(createNewCheckboxt('theName', 'theID'));
+
+    $('#clear').click(function (e) {
+        e.preventDefault();
+        var info = $('#foo').val();
+        $.ajax({
+            type: "POST",
+            url: '/user/clear',
+            // The key needs to match your method's input parameter (case-sensitive).
+            data: JSON.stringify({data: info}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                location.reload();
+            },
+            failure: function (errMsg) {
+                alert('save error!');
+            }
+        });
+    });
+
+
+    /*$('#submit').click(function (e) {
         $('#submit').hide();
         $('#foo').hide();
         e.preventDefault();
@@ -123,9 +152,31 @@ https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js--%>
                 alert('save error!');
             }
         });
-    });
+    });*/
 
     $(document).ready(function () {
+        // load ips
+        /*$.ajax({
+            type: "GET",
+            url: '/user/ip/list',
+            // The key needs to match your method's input parameter (case-sensitive).
+            data: JSON.stringify({data: info}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                log.info(data);
+            },
+            failure: function (errMsg) {
+                alert('save error!');
+            }
+        });*/
+
+
+        $("#btnSubmit").click(function (event) {
+            event.preventDefault();
+            fire_ajax_submit();
+        });
+
         $('#user1').DataTable({
             "processing": true,
             "serverSide": true,
@@ -141,7 +192,7 @@ https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js--%>
                         return moment(d).format("YYYY/MM/DD HH:mm:ss");
                     }
                 },
-                {"data": "message"},
+                {"data": "type"},
                 {"data": "ip"}
             ]
         });
@@ -150,7 +201,7 @@ https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js--%>
             "processing": true,
             "serverSide": true,
             "searching": false,
-            "ajax": "/user/identifyPhotosOfFriends/list",
+            "ajax": "/user/facebook/account/list",
             "columns": [
                 {"data": "id"},
                 {"data": "name"},
@@ -161,11 +212,43 @@ https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js--%>
                         return moment(d).format("YYYY/MM/DD HH:mm:ss");
                     }
                 },
-                {"data": "message"},
+                {"data": "type"},
                 {"data": "ip"}
             ]
         });
     });
+
+    function fire_ajax_submit() {
+
+        // Get form
+        var form = $('#fileUploadForm')[0];
+        var data = new FormData(form);
+        data.append("CustomField", "This is some extra data, testing");
+        $("#btnSubmit").prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            enctype: 'multipart/form-data',
+            url: "/user/api/upload",
+            data: data,
+            processData: false, //prevent jQuery from automatically transforming the data into a query string
+            contentType: false,
+            cache: false,
+            timeout: 600000,
+            success: function (data) {
+                $("#result").text(data);
+                console.log("SUCCESS : ", data);
+                location.reload();
+            },
+            error: function (e) {
+                $("#result").text(e.responseText);
+                console.log("ERROR : ", e);
+                $("#btnSubmit").prop("disabled", false);
+
+            }
+        });
+    }
+
 </script>
 
 </body>

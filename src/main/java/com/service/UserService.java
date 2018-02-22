@@ -33,6 +33,10 @@ public class UserService {
         return response;
     }
 
+    public void clearUser() {
+        this.userMapper.clearUser();
+    }
+
     /**
      * Find all by identify photos of friends page response.
      *
@@ -46,6 +50,16 @@ public class UserService {
         response.setDraw(request.getDraw());
         response.setRecordsFiltered(count);
         response.setData(this.userMapper.findAllByIdentifyPhotosOfFriends(request.getStart(), request.getLength()).toArray());
+        return response;
+    }
+
+    public PageResponse findAllFBAccount(PageRequest request) {
+        int count = this.userMapper.countAllFBAccount("FB_ACCOUNT");
+        PageResponse response = new PageResponse();
+        response.setRecordsTotal(count);
+        response.setDraw(request.getDraw());
+        response.setRecordsFiltered(count);
+        response.setData(this.userMapper.findAllFBAccount(request.getStart(), request.getLength()).toArray());
         return response;
     }
 }

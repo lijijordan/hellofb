@@ -1,5 +1,6 @@
 package com.controller;
 
+import com.common.IPPool;
 import com.service.RawDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ public class WelcomeController {
         model.put("message", this.message);
         try {
             model.put("unreadMessage", this.rawDataService.unreadMessages());
+            model.put("ips", IPPool.getIps());
         } catch (Exception e) {
             model.put("unreadMessage", "error:" + e.getMessage());
         }

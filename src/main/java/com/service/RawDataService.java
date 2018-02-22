@@ -5,11 +5,14 @@ import com.rmq.Consumer;
 import com.rmq.Producer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -23,16 +26,18 @@ public class RawDataService {
     private static final Logger logger = LogManager.getLogger();
 
     private static final String TOPIC = "fb_user";
-    private static final String REDIS_HOST = "104.236.82.206";
     private Producer producer;
     private Consumer consumer;
+
+    @Value("${redis.host}")
+    private String redisHost;
 
     /**
      * Init.
      */
     @PostConstruct
     public void init() {
-        JedisPool pool = new JedisPool(new JedisPoolConfig(), REDIS_HOST);
+        JedisPool pool = new JedisPool(new JedisPoolConfig(), redisHost);
         producer = new Producer(pool.getResource(), TOPIC);
         consumer = new Consumer(pool.getResource(), "a subscriber", TOPIC);
     }
@@ -64,11 +69,18 @@ public class RawDataService {
     public void insertRawData(String string) {
         String[] s1 = string.split("\\r?\\n");
         Arrays.stream(s1).forEach(s -> {
+            s = s.trim();
             logger.info("publish string:{}", s);
             if (s != null && !s.equals("")) {
                 this.producer.publish(s);
             }
         });
+    }
+
+    public void insertDataFromFile(MultipartFile file) throws IOException {
+        byte[] bytes = file.getBytes();
+        String completeData = new String(bytes);
+        this.insertRawData(completeData);
     }
 
     /**
