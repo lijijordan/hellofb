@@ -29,7 +29,7 @@ public class RawDataService {
     private Producer producer;
     private Consumer consumer;
 
-    @Value("${redis.host}")
+    @Value("${redis.host:127.0.0.1}")
     private String redisHost;
 
     /**
