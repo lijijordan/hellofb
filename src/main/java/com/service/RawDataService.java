@@ -37,6 +37,7 @@ public class RawDataService {
      */
     @PostConstruct
     public void init() {
+        System.out.println("Init redis pool!");
         JedisPool pool = new JedisPool(new JedisPoolConfig(), "127.0.0.1");
         producer = new Producer(pool.getResource(), TOPIC);
         consumer = new Consumer(pool.getResource(), "a subscriber", TOPIC);
